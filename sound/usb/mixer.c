@@ -3084,3 +3084,4 @@ void snd_usb_mixer_elem_init_std(struct usb_mixer_elem_list *list,
 	list->resume = restore_mixer_value;
 #endif
 }
+
