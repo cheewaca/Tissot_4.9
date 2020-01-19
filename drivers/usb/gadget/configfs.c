@@ -329,7 +329,6 @@ static ssize_t gadget_dev_desc_UDC_store(struct config_item *item,
 			gi->composite.gadget_driver.udc_name = NULL;
 			goto err;
 		}
-		schedule_work(&gi->work);
 	}
 	mutex_unlock(&gi->lock);
 	return len;
@@ -1828,3 +1827,4 @@ static void __exit gadget_cfs_exit(void)
 
 }
 module_exit(gadget_cfs_exit);
+
