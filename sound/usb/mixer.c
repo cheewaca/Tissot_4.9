@@ -722,7 +722,7 @@ static int get_term_name(struct mixer_build *state, struct usb_audio_term *iterm
  * parse the source unit recursively until it reaches to a terminal
  * or a branched unit.
  */
-static int check_input_term(struct mixer_build *state, int id,
+static int __check_input_term(struct mixer_build *state, int id,
 			    struct usb_audio_term *term)
 {
 	int err;
@@ -745,7 +745,7 @@ static int check_input_term(struct mixer_build *state, int id,
 
 				/* call recursively to verify that the
 				 * referenced clock entity is valid */
-				err = check_input_term(state, d->bCSourceID, term);
+				err = __check_input_term(state, d->bCSourceID, term);
 				if (err < 0)
 					return err;
 
@@ -760,7 +760,7 @@ static int check_input_term(struct mixer_build *state, int id,
 			} else { /* UAC_VERSION_3 */
 				struct uac3_input_terminal_descriptor *d = p1;
 
-				err = check_input_term(state,
+				err = __check_input_term(state,
 							d->bCSourceID, term);
 				if (err < 0)
 					return err;
@@ -1778,7 +1778,7 @@ static int parse_audio_feature_unit(struct mixer_build *state, int unitid,
 	}
 
 	/* determine the input source type and name */
-	err = check_input_term(state, hdr->bSourceID, &iterm);
+	err = __check_input_term(state, hdr->bSourceID, &iterm);
 	if (err < 0)
 		return err;
 
@@ -1972,7 +1972,7 @@ static int parse_audio_mixer_unit(struct mixer_build *state, int unitid,
 		/* no bmControls field (e.g. Maya44) -> ignore */
 		if (desc->bLength <= 10 + input_pins)
 			continue;
-		err = check_input_term(state, desc->baSourceID[pin], &iterm);
+		err = __check_input_term(state, desc->baSourceID[pin], &iterm);
 		if (err < 0)
 			return err;
 		num_ins += iterm.channels;
@@ -2436,7 +2436,7 @@ static int parse_audio_selector_unit(struct mixer_build *state, int unitid,
 		}
 		len = check_mapped_selector_name(state, unitid, i, namelist[i],
 						 MAX_ITEM_NAME_LEN);
-		if (! len && check_input_term(state, desc->baSourceID[i], &iterm) >= 0)
+		if (! len && __check_input_term(state, desc->baSourceID[i], &iterm) >= 0)
 			len = get_term_name(state, &iterm, namelist[i], MAX_ITEM_NAME_LEN, 0);
 		if (! len)
 			sprintf(namelist[i], "Input %u", i);
